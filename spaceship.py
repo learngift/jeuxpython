@@ -7,7 +7,22 @@ player_img = pygame.transform.scale(player_img, (64, 64))
 shoot_sound = pygame.mixer.Sound('Normal shot.ogg')
 
 # liste des tirs
-bullets = []
+bullets = pygame.sprite.Group()
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface([4, 10])
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self):
+        # Déplacement des tirs du joueur
+        self.rect.y -= 10
+        if self.rect.y < 0:
+            self.kill()
 
 class Spaceship(pygame.sprite.Sprite):
     INSTANCE = None
@@ -29,15 +44,8 @@ class Spaceship(pygame.sprite.Sprite):
         # Tir du joueur
         global bullets
         if keys[pygame.K_SPACE]:
-            bullet = pygame.Rect(self.rect.centerx - 2, self.rect.top - 10, 4, 10)
-            bullets.append(bullet)
+            bullets.add(Bullet(self.rect.centerx - 2, self.rect.top - 10))
             pygame.mixer.Sound.play(shoot_sound)
-
-        # Déplacement des tirs
-        for bullet in bullets:
-            bullet.y -= 10
-        # Suppression des tirs qui sortent de l'écran
-        bullets[:] = [bullet for bullet in bullets if bullet.y > 0]
 
         # Limitez le vaisseau spatial aux limites de l'écran
         self.rect.x = max(0, min(self.rect.x, WIDTH - self.rect.width))

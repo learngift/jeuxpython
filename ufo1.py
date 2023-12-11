@@ -1,5 +1,6 @@
 from constant import *
 from hostile_shoot import Hostile_Shoot
+from spaceship import Spaceship
 
 # Chargez l'image du spaceship
 spaceship_img = pygame.image.load("spaceship.png")
@@ -19,7 +20,7 @@ class Ufo1(pygame.sprite.Sprite):
     def update(self):
         if random.randint(0, 100) < 2:
             global hostile_shoots
-            hostile_shoots.append(Hostile_Shoot(self.rect, player_rect))
+            hostile_shoots.append(Hostile_Shoot(self.rect, Spaceship.INSTANCE.rect))
             pygame.mixer.Sound.play(shoot2_sound)
 
         self.rect.x += random.randint(-3, 3)

@@ -15,4 +15,4 @@ GREEN = (0, 255, 0)
 pygame.init()
 pygame.mixer.init()
 
-player_rect = pygame.Rect(0, 0, 64, 64)
+# player_rect = pygame.Rect(0, 0, 64, 64)

@@ -7,14 +7,13 @@ from ufo1 import Ufo1, hostile_shoots
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Jeu de Tir Spatial")
 
-# Groupe pour les astéroïdes et les ovnis
+# Groupes pour les astéroïdes et les ovnis
 obstacles2 = pygame.sprite.Group()
+obstacles3 = pygame.sprite.Group() # ovnis
 
 # Groupe pour notre vaisseau spacial
 spaceship = pygame.sprite.Group()
 spaceship.add(Spaceship())
-
-ships = []
 
 # Score
 score = 0
@@ -30,41 +29,25 @@ while running:
     # Génération d'obstacles
     if random.randint(0, 100) < 5:
         obstacles2.add(Obstacle())
-    if (len(ships) < 2) and (random.randint(0, 100) < 1):
-        obstacle = Ufo1()
-        ships.append(obstacle)
-        obstacles2.add(obstacle)
+    if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
+        obstacles3.add(Ufo1())
 
     player_rect = Spaceship.INSTANCE.rect
 
     # Détection de collision
-    for obstacle2 in obstacles2:
-        if player_rect.colliderect(obstacle2):
-            running = False
+    if pygame.sprite.groupcollide(spaceship, obstacles2, True, True):
+        running = False
 
     for s in hostile_shoots:
-        if player_rect.collidepoint(s.x, s.y):
+        if player_rect.collidepoint(s.rect.x, s.rect.y):
             running = False
 
     # Détection de collision des tirs avec les astéroïdes
-    for bullet in bullets:
-        for obstacle2 in obstacles2:
-            if bullet.colliderect(obstacle2.rect):
-                try:
-                    bullets.remove(bullet)
-                    obstacle2.kill()
-                except ValueError:
-                    pass
-                score += 10
-        for ship in ships:
-            if bullet.colliderect(ship):
-                ships.remove(ship)
-                ship.kill()
-                try:
-                    bullets.remove(bullet)
-                except ValueError:
-                    pass
-                score += 50
+    if pygame.sprite.groupcollide(bullets, obstacles3, True, True):
+        score += 50
+
+    if pygame.sprite.groupcollide(bullets, obstacles2, True, True):
+        score += 10
 
     # Affichage
     SCREEN.fill(WHITE)
@@ -73,18 +56,20 @@ while running:
     pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(0, 0, WIDTH, HEIGHT))
 
     # Affichage du vaisseau spatial du joueur
-    # SCREEN.blit(player_img, player_rect)
     spaceship.update()
     spaceship.draw(SCREEN)
 
     obstacles2.update()
     obstacles2.draw(SCREEN)
+    obstacles3.update()
+    obstacles3.draw(SCREEN)
 
     # Affichage des tirs
-    for bullet in bullets:
-        pygame.draw.rect(SCREEN, RED, bullet)
+    bullets.update()
+    bullets.draw(SCREEN)
+
     for s in hostile_shoots:
-        pygame.draw.line(SCREEN, (0, 255, 0), (s.x, s.y), (s.x, s.y))
+        pygame.draw.line(SCREEN, (0, 255, 0), (s.rect.x, s.rect.y), (s.rect.x, s.rect.y))
         s.update()
 
     # Affichage du score
