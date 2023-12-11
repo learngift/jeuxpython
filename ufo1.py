@@ -9,7 +9,7 @@ spaceship_img = pygame.transform.scale(spaceship_img, (64, 32))
 shoot2_sound = pygame.mixer.Sound('NovaShot.ogg')
 
 # Liste des tirs
-hostile_shoots = []
+hostile_shoots = pygame.sprite.Group()
 
 class Ufo1(pygame.sprite.Sprite):
     def __init__(self):
@@ -20,13 +20,10 @@ class Ufo1(pygame.sprite.Sprite):
     def update(self):
         if random.randint(0, 100) < 2:
             global hostile_shoots
-            hostile_shoots.append(Hostile_Shoot(self.rect, Spaceship.INSTANCE.rect))
+            hostile_shoots.add(Hostile_Shoot(self.rect, Spaceship.INSTANCE.rect))
             pygame.mixer.Sound.play(shoot2_sound)
 
         self.rect.x += random.randint(-3, 3)
         self.rect.y += random.randint(-3, 3)
         self.rect.x = max(0, min(self.rect.x, WIDTH - 64))
         self.rect.y = max(0, min(self.rect.y, HEIGHT - 32))
-
-        # Suppression des obstacles hors de l'écran
-        hostile_shoots[:] = [shoot for shoot in hostile_shoots if shoot.on_screen() ]

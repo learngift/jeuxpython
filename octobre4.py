@@ -15,6 +15,7 @@ obstacles3 = pygame.sprite.Group() # ovnis
 spaceship = pygame.sprite.Group()
 spaceship.add(Spaceship())
 
+all_groups = [obstacles2, obstacles3, spaceship, bullets, hostile_shoots]
 # Score
 score = 0
 
@@ -32,15 +33,12 @@ while running:
     if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
         obstacles3.add(Ufo1())
 
-    player_rect = Spaceship.INSTANCE.rect
 
     # Détection de collision
     if pygame.sprite.groupcollide(spaceship, obstacles2, True, True):
         running = False
-
-    for s in hostile_shoots:
-        if player_rect.collidepoint(s.rect.x, s.rect.y):
-            running = False
+    if pygame.sprite.groupcollide(spaceship, hostile_shoots, True, True):
+        running = False
 
     # Détection de collision des tirs avec les astéroïdes
     if pygame.sprite.groupcollide(bullets, obstacles3, True, True):
@@ -55,22 +53,9 @@ while running:
     # Affichage de la route
     pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(0, 0, WIDTH, HEIGHT))
 
-    # Affichage du vaisseau spatial du joueur
-    spaceship.update()
-    spaceship.draw(SCREEN)
-
-    obstacles2.update()
-    obstacles2.draw(SCREEN)
-    obstacles3.update()
-    obstacles3.draw(SCREEN)
-
-    # Affichage des tirs
-    bullets.update()
-    bullets.draw(SCREEN)
-
-    for s in hostile_shoots:
-        pygame.draw.line(SCREEN, (0, 255, 0), (s.rect.x, s.rect.y), (s.rect.x, s.rect.y))
-        s.update()
+    for g in all_groups:
+        g.update()
+        g.draw(SCREEN)
 
     # Affichage du score
     font = pygame.font.Font(None, 36)
