@@ -1,5 +1,8 @@
 from constant import *
 
+# Liste des tirs
+hostile_shoots = pygame.sprite.Group()
+
 class Hostile_Shoot(pygame.sprite.Sprite):
     def __init__(self, ship, player):
         super().__init__()

@@ -1,8 +1,10 @@
 from constant import *
 from obstacle import Obstacle
 from spaceship import Spaceship, bullets
-from hostile_shoot import Hostile_Shoot
-from ufo1 import Ufo1, hostile_shoots
+from hostile_shoot import Hostile_Shoot, hostile_shoots
+from ufo1 import Ufo1
+from ufo2 import Ufo2
+from bonus import Bonus
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Jeu de Tir Spatial")
@@ -14,8 +16,9 @@ obstacles3 = pygame.sprite.Group() # ovnis
 # Groupe pour notre vaisseau spacial
 spaceship = pygame.sprite.Group()
 spaceship.add(Spaceship())
+autre = pygame.sprite.Group()
 
-all_groups = [obstacles2, obstacles3, spaceship, bullets, hostile_shoots]
+all_groups = [obstacles2, obstacles3, spaceship, bullets, hostile_shoots, autre]
 # Score
 score = 0
 
@@ -32,6 +35,12 @@ while running:
         obstacles2.add(Obstacle())
     if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
         obstacles3.add(Ufo1())
+    if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
+        obstacles3.add(Ufo2())
+
+    # Génération du bonus
+    if random.randint(0, 1000) < 2:
+        autre.add(Bonus())
 
 
     # Détection de collision
@@ -40,6 +49,8 @@ while running:
     if pygame.sprite.groupcollide(spaceship, hostile_shoots, True, True):
         running = False
 
+    if pygame.sprite.groupcollide(bullets, autre, True, True):
+        Spaceship.INSTANCE.bonus()
     # Détection de collision des tirs avec les astéroïdes
     if pygame.sprite.groupcollide(bullets, obstacles3, True, True):
         score += 50

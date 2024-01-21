@@ -3,14 +3,14 @@ from hostile_shoot import Hostile_Shoot, hostile_shoots
 from spaceship import Spaceship
 
 # Chargez l'image du spaceship
-spaceship_img = pygame.image.load("spaceship.png")
-spaceship_img = pygame.transform.scale(spaceship_img, (64, 32))
-spaceship2_img = pygame.image.load("spaceship2.png")
-spaceship2_img = pygame.transform.scale(spaceship2_img, (64, 32))
+spaceship_img = pygame.image.load("images/ufo2_3.png")
+spaceship_img = pygame.transform.scale(spaceship_img, (32, 32))
+spaceship2_img = pygame.image.load("images/ufo2_4.png")
+spaceship2_img = pygame.transform.scale(spaceship2_img, (32, 32))
 
 shoot2_sound = pygame.mixer.Sound('NovaShot.ogg')
 
-class Ufo1(pygame.sprite.Sprite):
+class Ufo2(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.rect = pygame.Rect(random.randint(0, WIDTH - 64), 0, 64, 32)

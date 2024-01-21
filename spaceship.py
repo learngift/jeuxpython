@@ -3,6 +3,8 @@ from constant import *
 # Chargez l'image du vaisseau spatial du joueur
 player_img = pygame.image.load("player.png")
 player_img = pygame.transform.scale(player_img, (64, 64))
+player2_img = pygame.image.load("player2.png")
+player2_img = pygame.transform.scale(player2_img, (64, 64))
 
 shoot_sound = pygame.mixer.Sound('Normal shot.ogg')
 
@@ -32,9 +34,18 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.x =  WIDTH // 2 - self.rect.width // 2
         self.rect.y = HEIGHT - self.rect.height - 20
         self.image = player_img
+        self.double_canon = 0
         Spaceship.INSTANCE = self
+        self.reload_delay = 0
+
+    def bonus(self):
+        self.double_canon = 500
 
     def update(self):
+        if self.image == player_img:
+            self.image = player2_img
+        else:
+            self.image = player_img
         # Déplacement du vaisseau spatial du joueur
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -43,9 +54,20 @@ class Spaceship(pygame.sprite.Sprite):
             self.rect.x += 5
         # Tir du joueur
         global bullets
-        if keys[pygame.K_SPACE]:
-            bullets.add(Bullet(self.rect.centerx - 2, self.rect.top - 10))
+        if keys[pygame.K_SPACE] and self.reload_delay == 0:
+            if self.double_canon > 0:
+                bullets.add(Bullet(self.rect.centerx - 2 + 20, self.rect.top - 10))
+                bullets.add(Bullet(self.rect.centerx - 2 - 20, self.rect.top - 10))
+            else:
+                bullets.add(Bullet(self.rect.centerx - 2, self.rect.top - 10))
             pygame.mixer.Sound.play(shoot_sound)
+            self.reload_delay = 10
+
+        if self.reload_delay > 0:
+            self.reload_delay = self.reload_delay - 1
 
         # Limitez le vaisseau spatial aux limites de l'écran
         self.rect.x = max(0, min(self.rect.x, WIDTH - self.rect.width))
+
+        if self.double_canon > 0:
+            self.double_canon = self.double_canon - 1
