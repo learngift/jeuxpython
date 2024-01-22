@@ -10,6 +10,18 @@ spaceship2_img = pygame.transform.scale(spaceship2_img, (32, 32))
 
 shoot2_sound = pygame.mixer.Sound('NovaShot.ogg')
 
+def lire_points(filename):
+    """ Lit des points à partir d'un fichier CSV et les retourne sous forme de liste de tuples. """
+    points = []
+    with open(filename, 'r', newline='') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            point = (int(row[0]), int(row[1]))
+            points.append(point)
+    return points
+
+points = lire_points('traj_ufo.csv')
+
 class Ufo2(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
