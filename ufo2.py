@@ -20,7 +20,7 @@ def lire_points(filename):
             points.append(point)
     return points
 
-points = lire_points('traj_ufo.csv')
+#points = lire_points('traj_ufo.csv')
 
 class Ufo2(pygame.sprite.Sprite):
     def __init__(self):
