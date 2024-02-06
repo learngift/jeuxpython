@@ -24,6 +24,10 @@ score = 0
 
 clock = pygame.time.Clock()
 
+wave = 1
+nb_ufo1_killed = 0
+nb_ufo2 = 0 # number of ufo2 created
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -33,10 +37,14 @@ while running:
     # Génération d'obstacles
     if random.randint(0, 100) < 5:
         obstacles2.add(Obstacle())
-    if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
-        obstacles3.add(Ufo1())
-    if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
-        obstacles3.add(Ufo2())
+    if wave == 1:
+        if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
+            obstacles3.add(Ufo1())
+    elif wave == 2:
+        if nb_ufo2 < 9 and Ufo2.i > 30 * nb_ufo2:
+            obstacles3.add(Ufo2(nb_ufo2))
+            nb_ufo2 = nb_ufo2 + 1
+        Ufo2.i = Ufo2.i + 1
 
     # Génération du bonus
     if random.randint(0, 1000) < 2:
@@ -54,6 +62,15 @@ while running:
     # Détection de collision des tirs avec les astéroïdes
     if pygame.sprite.groupcollide(bullets, obstacles3, True, True):
         score += 50
+        if wave == 1:
+            nb_ufo1_killed = nb_ufo1_killed + 1
+            if nb_ufo1_killed == 10:
+                wave = 2
+                Ufo2.i = 0
+        elif wave == 2:
+            if len(obstacles3) == 0:
+                wave = 1
+                nb_ufo1_killed = 0
 
     if pygame.sprite.groupcollide(bullets, obstacles2, True, True):
         score += 10

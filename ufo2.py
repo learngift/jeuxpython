@@ -1,6 +1,7 @@
 from constant import *
 from hostile_shoot import Hostile_Shoot, hostile_shoots
 from spaceship import Spaceship
+import csv
 
 # Chargez l'image du spaceship
 spaceship_img = pygame.image.load("images/ufo2_3.png")
@@ -20,14 +21,15 @@ def lire_points(filename):
             points.append(point)
     return points
 
-#points = lire_points('traj_ufo.csv')
+points = lire_points('traj_ufo1.csv')
 
 class Ufo2(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, id):
         super().__init__()
         self.rect = pygame.Rect(random.randint(0, WIDTH - 64), 0, 64, 32)
         self.image = spaceship_img
         self.count = 0
+        self.id = id
 
     def update(self):
         if self.count == 0:
@@ -45,7 +47,9 @@ class Ufo2(pygame.sprite.Sprite):
             hostile_shoots.add(Hostile_Shoot(self.rect, Spaceship.INSTANCE.rect))
             pygame.mixer.Sound.play(shoot2_sound)
 
-        self.rect.x += random.randint(-3, 3)
-        self.rect.y += random.randint(-3, 3)
-        self.rect.x = max(0, min(self.rect.x, WIDTH - 64))
-        self.rect.y = max(0, min(self.rect.y, HEIGHT - 32))
+        k = (Ufo2.i - 30 * self.id)  % len(points)
+        self.rect.x = points[k][0]
+        self.rect.y = points[k][1]
+
+        if Ufo2.i > 2 * len(points):
+            Ufo2.i = len(points)

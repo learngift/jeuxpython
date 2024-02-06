@@ -6,23 +6,26 @@ import math
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Editeur de trajectoire d'UFO")
 
+def dist(p1, p2):
+    res = 0.0
+    for i in range(len(p1)):
+        res = res + (p1[i]-p2[i]) ** 2
+    return math.sqrt(res)
+
 def interpolate(pts):
-    res = [pts[0]]
-    pos = None
+    pos = pts.pop(0)
+    res = [pos]
 
     speed = 5
 
     for point in pts:
-        if pos == None:
-            pos = point
-        else:
-            nb_points = int(math.sqrt((point[1]-pos[1]) ** 2 + (point[0]-pos[0]) ** 2) / speed)
-            for _ in range(nb_points):
-                angle = math.atan2(point[1]-pos[1], point[0]-pos[0])
-                dx = int(speed * math.cos(angle))
-                dy = int(speed * math.sin(angle))
-                pos = pos[0] + dx, pos[1] + dy
-                res.append(pos)
+        while dist(point, pos) > speed:
+            angle = math.atan2(point[1]-pos[1], point[0]-pos[0])
+            dx = int(speed * math.cos(angle))
+            dy = int(speed * math.sin(angle))
+            pos = pos[0] + dx, pos[1] + dy
+            res.append(pos)
+    pts.insert(0, res[0])
     return res
 
 def save_points():
@@ -51,20 +54,24 @@ def test():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_t:
                     return
-        spaceship_rect.x = pts[i][0]
-        spaceship_rect.y = pts[i][1]
 
         pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(0, 0, WIDTH, HEIGHT))
-        pygame.draw.lines(SCREEN, (255, 255, 0), False, points)
+        # pygame.draw.lines(SCREEN, (255, 255, 0), False, points)
 
-        SCREEN.blit(spaceship_img, spaceship_rect)
+        for j in range(9):
+            k = (i - j * 30) % len(pts)
+            if i < j * 30 : continue
+            spaceship_rect.x = pts[k][0]
+            spaceship_rect.y = pts[k][1]
+            SCREEN.blit(spaceship_img, spaceship_rect)
+
 
         pygame.display.flip()
         clock.tick(30)
 
         i = i + 1
-        if i == len(pts):
-            i = 0
+        if i == 2 * len(pts):
+            i = len(pts)
 
 running = True
 while running:
@@ -78,7 +85,7 @@ while running:
                 points.pop()
             if event.key == pygame.K_s:
                 save_points()
-            if event.key == pygame.K_t:
+            if event.key == pygame.K_t and len(points) > 2:
                 test()
 
     pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(0, 0, WIDTH, HEIGHT))
