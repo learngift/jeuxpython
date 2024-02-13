@@ -42,7 +42,7 @@ class Ufo2(pygame.sprite.Sprite):
         else:
             self.count = self.count + 1
 
-        if random.randint(0, 100) < 2:
+        if random.randint(0, 100) < 2 and self.rect.y < 200:
             global hostile_shoots
             hostile_shoots.add(Hostile_Shoot(self.rect, Spaceship.INSTANCE.rect))
             pygame.mixer.Sound.play(shoot2_sound)

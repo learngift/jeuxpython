@@ -5,6 +5,7 @@ from hostile_shoot import Hostile_Shoot, hostile_shoots
 from ufo1 import Ufo1
 from ufo2 import Ufo2
 from bonus import Bonus
+from hiscore import add_score
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Jeu de Tir Spatial")
@@ -41,9 +42,10 @@ while running:
         if (len(obstacles3) < 2) and (random.randint(0, 100) < 1):
             obstacles3.add(Ufo1())
     elif wave == 2:
-        if nb_ufo2 < 9 and Ufo2.i > 30 * nb_ufo2:
+        if nb_ufo2 < 9 and Ufo2.i > 30 * nb_ufo2 + 10:
             obstacles3.add(Ufo2(nb_ufo2))
             nb_ufo2 = nb_ufo2 + 1
+            print(f'Creation ufo2 (total: {nb_ufo2}, i={Ufo2.i})')
         Ufo2.i = Ufo2.i + 1
 
     # Génération du bonus
@@ -64,22 +66,23 @@ while running:
         score += 50
         if wave == 1:
             nb_ufo1_killed = nb_ufo1_killed + 1
-            if nb_ufo1_killed == 10:
+            print(f'nb_ufo1_killed={nb_ufo1_killed}')
+            if nb_ufo1_killed == 2: # pour le test 10:
                 wave = 2
+                nb_ufo2 = 0
                 Ufo2.i = 0
+                print('Fin vague 1 -> vague 2')
         elif wave == 2:
-            if len(obstacles3) == 0:
+            if len(obstacles3) == 0 and nb_ufo2 == 9:
                 wave = 1
                 nb_ufo1_killed = 0
+                print('Fin vague 2 -> vague 1')
 
     if pygame.sprite.groupcollide(bullets, obstacles2, True, True):
         score += 10
 
     # Affichage
-    SCREEN.fill(WHITE)
-
-    # Affichage de la route
-    pygame.draw.rect(SCREEN, (0, 0, 0), pygame.Rect(0, 0, WIDTH, HEIGHT))
+    SCREEN.fill(BLACK)
 
     for g in all_groups:
         g.update()
@@ -97,3 +100,6 @@ pygame.quit()
 
 # Affichage du score final dans la console
 print(f"Score final : {score}")
+add_score(score)
+
+'''idée ajouter un bouclier'''
