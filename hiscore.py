@@ -27,9 +27,11 @@ def save_hiscores():
 hiscores = read_hiscores()
 
 def add_score(score):
+    # Affichage du score final dans la console
+    print(f"Score final : {score}")
     if score < hiscores[0][0]:
         print(f'Vous n\'avez pas un hiscore, il fallait battre {hiscores[0][0]}')
-        return
+        return display_hall_of_fame()
     name = input('Vous avez un hiscore, quel est votre nom ?')
     hiscores.pop(0)
     i = 0
@@ -37,14 +39,15 @@ def add_score(score):
         i = i + 1
     hiscores.insert(i, (score, name))
     save_hiscores()
+    return display_hall_of_fame()
 
 def display_hall_of_fame():
     '''renvoit False pour arréter de jouer'''
     SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Jeu de Tir Spatial")
 
-    play_rect = pygame.Rect(150, 550, 100, 30)
-    quit_rect = pygame.Rect(550, 550, 100, 30)
+    play_rect = pygame.Rect(150, 550, 80, 30)
+    quit_rect = pygame.Rect(550, 550, 80, 30)
     clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():
@@ -62,13 +65,22 @@ def display_hall_of_fame():
         # Affichage des boutons
         font = pygame.font.Font(None, 36)
 
-        pygame.draw.rect(SCREEN, RED, pygame.Rect(50, 50, 10, 10))
         pygame.draw.rect(SCREEN, BLUE, play_rect)
         SCREEN.blit(font.render("Play", True, RED), (155, 555))
         SCREEN.blit(font.render("Quit", True, BLUE), (555, 555))
 
+        SCREEN.blit(font.render("Hall of Fame", True, YELLOW), (360, 10))
+        for i in range(len(hiscores)):
+            x = 10 if i < 10 else 10 + WIDTH / 2
+            hiscore = hiscores[len(hiscores) - i -1]
+            SCREEN.blit(font.render(hiscore[1], True, WHITE),
+                                    (x, 120 + 36 * (i % 10)))
+            x = 310 if i < 10 else 310 + WIDTH / 2
+            SCREEN.blit(font.render(str(hiscore[0]), True, WHITE),
+                                    (x, 120 + 36 * (i % 10)))
+
         pygame.display.flip()
         clock.tick(30)
 
-#display_hall_of_fame()
-#pygame.quit()
+# display_hall_of_fame()
+# pygame.quit()
