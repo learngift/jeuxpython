@@ -98,7 +98,7 @@ while True:
         pygame.display.flip()
         clock.tick(30)
 
-    if not add_score(score):
+    if not add_score(score, SCREEN):
         break
 
 pygame.quit()
