@@ -8,9 +8,43 @@ font = pygame.font.SysFont(None, 22)
 
 painting = []
 
-ma_surface = pygame.image.load('player.png')
-buf = ma_surface.get_buffer()
-zoom = 3
+class ImageFromFile:
+    def __init__(self, filename):
+        self.ma_surface = pygame.image.load(filename)
+        self.buf = self.ma_surface.get_buffer()
+        self.zoom = 3
+        self.x = 0
+        self.y = 0
+        self.dragging = False
+
+    def paint(self, screen):
+        bs = self.ma_surface.get_bytesize()
+        for x in range(self.ma_surface.get_width()):
+            for y in range(self.ma_surface.get_height()):
+                i = (x + y * self.ma_surface.get_width()) * bs
+                couleur = (self.buf.raw[i], self.buf.raw[i+1], self.buf.raw[i+2])
+                if bs != 4 or self.buf.raw[i+3] != 0:
+                    pygame.draw.rect(screen, couleur, [x*self.zoom+self.x, y*self.zoom+100+self.y, self.zoom, self.zoom])
+
+    def isHit(self, pos):
+        return pos[0] >= self.x and pos[1] >= self.y+100 \
+                and pos[0] <= self.x + self.ma_surface.get_width() * self.zoom \
+                and pos[1] <= self.y+100 + self.ma_surface.get_height() * self.zoom
+
+    def startDrag(self, pos):
+        if self.isHit(pos):
+            self.dragging = True
+            print("start drag")
+            self.dx = pos[0] - self.x
+            self.dy = pos[1] - self.y
+
+    def updateDrag(self, pos):
+        if self.dragging:
+            self.x = pos[0] - self.dx
+            self.y = pos[1] - self.dy
+
+currentImage = ImageFromFile('player.png')
+
 
 message = ''
 display_delay = 0
@@ -21,16 +55,29 @@ def actions_btn_1():
     file_path = filedialog.askopenfilename()
     root.destroy()
     if file_path:
-        global ma_surface, buf
-        ma_surface = pygame.image.load(file_path)
-        buf = ma_surface.get_buffer()
+        global currentImage
+        painting.append(currentImage)
+        currentImage = ImageFromFile(file_path)
+
+def actions_btn_3(pos): # right button
+    paints = painting
+    for i in range(len(paints)):
+        p = paints[i]
+        if isinstance(p, ImageFromFile) and p.isHit(pos):
+            del paints[i]
+            global currentImage
+            paints.append(currentImage)
+            currentImage = p
 
 def actions_btn_save():
     new_surface = pygame.Surface((WIDTH, HEIGHT))
     new_surface.fill(WHITE)
     paints = painting
-    for i in range(len(paints)):
-        pygame.draw.circle(new_surface, paints[i][0], paints[i][1], paints[i][2])
+    for p in paints:
+        if isinstance(p, ImageFromFile):
+            p.paint(new_surface)
+        else:
+            pygame.draw.circle(new_surface, p[0], p[1], p[2])
     i = 0
     filename = 'image.png'
     while os.path.exists(filename):
@@ -42,15 +89,13 @@ def actions_btn_save():
     message = f"l'image a été sauvée dans {filename}"
 
 def draw_painting(paints):
-    for i in range(len(paints)):
-        pygame.draw.circle(SCREEN, paints[i][0], paints[i][1], paints[i][2])
-    bs = ma_surface.get_bytesize()
-    for x in range(ma_surface.get_width()):
-        for y in range(ma_surface.get_height()):
-            i = (x + y * ma_surface.get_width()) * bs
-            couleur = (buf.raw[i], buf.raw[i+1], buf.raw[i+2])
-            if bs != 4 or buf.raw[i+3] != 0:
-                pygame.draw.rect(SCREEN, couleur, [x*zoom, y*zoom+100, zoom, zoom])
+    for p in paints:
+        # pygame.draw.circle(SCREEN, paints[i][0], paints[i][1], paints[i][2])
+        if isinstance(p, ImageFromFile):
+            p.paint(SCREEN)
+        else:
+            pygame.draw.circle(SCREEN, p[0], p[1], p[2])
+    currentImage.paint(SCREEN)
     global display_delay, message
     if display_delay > 0:
         display_delay = display_delay - 1
@@ -117,8 +162,13 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
             print (f"middle down {event.pos}")
+            currentImage.startDrag(event.pos)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 2:
             print (f"middle button up {event.pos}")
+            currentImage.dragging = False
+            print("end drag")
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            actions_btn_3(event.pos)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             for i in range(len(brushes)):
                 if brushes[i].collidepoint(event.pos):
@@ -133,13 +183,16 @@ while running:
                     elif i == 1:
                         actions_btn_save()
                     else:
-                        zoom = i + (i-2) * 2
+                        currentImage.zoom = i + (i-2) * 2
         elif event.type == pygame.VIDEORESIZE:
             WIDTH = max(535, event.w)
             HEIGHT = max(350, event.h)
             # There's some code to add back window content here.
             surface = pygame.display.set_mode((WIDTH, HEIGHT),
                                               pygame.RESIZABLE)
+
+    if currentImage.dragging:
+        currentImage.updateDrag(pygame.mouse.get_pos())
 
     pygame.display.flip()
     clock.tick(60)
